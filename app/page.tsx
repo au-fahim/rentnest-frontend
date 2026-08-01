@@ -56,7 +56,7 @@ export default async function Home() {
           <div className="mx-auto grid min-h-[calc(100dvh-4rem)] w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_0.88fr] lg:px-8">
             <div className="max-w-3xl">
               <p className="mb-4 inline-flex rounded-full border bg-background px-3 py-1 text-sm font-medium text-muted-foreground">
-                RentNest Frontend Project
+                RentNest
               </p>
               <h1 className="text-balance text-4xl font-semibold tracking-normal text-foreground sm:text-5xl lg:text-6xl">
                 Find and list rental homes with less friction.
