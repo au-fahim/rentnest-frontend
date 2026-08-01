@@ -1,65 +1,156 @@
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { PropertyGrid } from "@/components/properties/property-grid";
+import { Button } from "@/components/ui/button";
+import { appRoutes } from "@/config/routes";
+import { getProperties } from "@/lib/api/public-services";
+
+const trustSignals = [
+  "Verified rental requests",
+  "Role-based dashboards",
+  "Stripe-ready payments",
+];
+
+const workflowCards = [
+  {
+    icon: Search,
+    title: "Browse with intent",
+    description:
+      "Search by location, budget, category, and amenities before opening a detail view.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Request with confidence",
+    description:
+      "Tenants submit validated rental requests and track approval status from one dashboard.",
+  },
+  {
+    icon: Building2,
+    title: "Manage listings cleanly",
+    description:
+      "Landlords get a focused workspace for properties, requests, availability, and earnings.",
+  },
+];
+
+export default async function Home() {
+  const featuredProperties = await getProperties().then(
+    (properties) => properties.slice(0, 3),
+    () => [],
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader />
+      <main className="flex-1">
+        <section className="relative isolate overflow-hidden border-b bg-secondary/40">
+          <div className="mx-auto grid min-h-[calc(100dvh-4rem)] w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_0.88fr] lg:px-8">
+            <div className="max-w-3xl">
+              <p className="mb-4 inline-flex rounded-full border bg-background px-3 py-1 text-sm font-medium text-muted-foreground">
+                RentNest Frontend Project
+              </p>
+              <h1 className="text-balance text-4xl font-semibold tracking-normal text-foreground sm:text-5xl lg:text-6xl">
+                Find and list rental homes with less friction.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+                A production-minded rental marketplace for tenants, landlords,
+                and admins, built around real API integration, protected
+                workflows, structured feedback, and responsive UI.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link href={appRoutes.properties}>
+                    Browse rentals
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href={appRoutes.register}>Create account</Link>
+                </Button>
+              </div>
+              <ul className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+                {trustSignals.map((signal) => (
+                  <li key={signal} className="flex items-center gap-2">
+                    <CheckCircle2
+                      className="size-4 text-primary"
+                      aria-hidden="true"
+                    />
+                    {signal}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="relative min-h-[360px] overflow-hidden rounded-lg border bg-card shadow-sm lg:min-h-[540px]">
+              <Image
+                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85"
+                alt="Bright modern apartment living room"
+                fill
+                priority
+                sizes="(min-width: 1024px) 44vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+                <p className="text-sm uppercase tracking-[0.18em] text-white/70">
+                  Marketplace preview
+                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-normal">
+                  Airbnb-inspired browsing, dashboard-grade operations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-primary">
+                Featured rentals
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-normal">
+                Fresh from the marketplace
+              </h2>
+            </div>
+            <Button asChild variant="outline">
+              <Link href={appRoutes.properties}>View all</Link>
+            </Button>
+          </div>
+          <PropertyGrid properties={featuredProperties} />
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="grid gap-4 md:grid-cols-3">
+            {workflowCards.map((card) => (
+              <article
+                key={card.title}
+                className="rounded-lg border bg-card p-5 text-card-foreground shadow-sm"
+              >
+                <card.icon
+                  className="mb-4 size-6 text-primary"
+                  aria-hidden="true"
+                />
+                <h2 className="text-lg font-semibold tracking-normal">
+                  {card.title}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {card.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -25,13 +25,21 @@ export default function LoginPage() {
             RentNest keeps authentication on the server with HttpOnly cookies,
             then adapts dashboards and navigation to your verified role.
           </p>
-          <Link href={appRoutes.properties} className="mt-6 inline-flex text-sm font-medium text-primary hover:underline">
+          <Link
+            href={appRoutes.properties}
+            className="mt-6 inline-flex text-sm font-medium text-primary hover:underline"
+          >
             Browse public properties first
           </Link>
         </section>
-        <AuthCard title="Welcome back" description="Use your registered RentNest credentials.">
-          <LoginForm />
-        </AuthCard>
+        <div className="mx-auto w-full max-w-sm lg:max-w-md lg:mx-0">
+          <AuthCard
+            title="Welcome back"
+            description="Use your registered RentNest credentials."
+          >
+            <LoginForm />
+          </AuthCard>
+        </div>
       </main>
     </div>
   );

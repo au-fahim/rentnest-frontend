@@ -15,7 +15,9 @@ export default function RegisterPage() {
       <SiteHeader />
       <main className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <section className="hidden lg:block">
-          <p className="text-sm font-medium text-primary">Role-based onboarding</p>
+          <p className="text-sm font-medium text-primary">
+            Role-based onboarding
+          </p>
           <h1 className="mt-3 max-w-lg text-4xl font-semibold tracking-normal">
             Pick the account type that matches how you use RentNest.
           </h1>
@@ -24,9 +26,14 @@ export default function RegisterPage() {
             workspaces. Admin access is managed privately.
           </p>
         </section>
-        <AuthCard title="Create account" description="Select a role and complete your profile.">
-          <RegisterForm />
-        </AuthCard>
+        <div className="mx-auto w-full max-w-sm lg:max-w-md lg:mx-0">
+          <AuthCard
+            title="Create account"
+            description="Select a role and complete your profile."
+          >
+            <RegisterForm />
+          </AuthCard>
+        </div>
       </main>
     </div>
   );
