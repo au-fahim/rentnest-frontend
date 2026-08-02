@@ -1,10 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ImagePlus,
+  Loader2,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -12,13 +20,34 @@ import { FieldError } from "@/components/forms/field-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SearchableMultiSelect } from "@/components/ui/searchable-multi-select";
+import {
+  getAmenityOptions,
+  parseAmenityList,
+  serializeAmenityList,
+} from "@/config/amenities";
 import { deletePropertyImageAction } from "@/lib/api/form-actions";
 import type { Category, Property } from "@/types/domain";
-import { propertySchema, type PropertyFormInput, type PropertyInput } from "@/types/forms";
+import {
+  propertySchema,
+  type PropertyFormInput,
+  type PropertyInput,
+} from "@/types/forms";
 
 const maxImageCount = 6;
 const maxImageSize = 5 * 1024 * 1024;
-const allowedImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const allowedImageTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+type SelectedUpload = {
+  id: string;
+  file: File;
+  previewUrl: string;
+};
 
 type PropertyFormProps = {
   categories: Category[];
@@ -31,14 +60,23 @@ type PropertyFormProps = {
   }>;
 };
 
-export function PropertyForm({ categories, property, submitLabel, action }: PropertyFormProps) {
+export function PropertyForm({
+  categories,
+  property,
+  submitLabel,
+  action,
+}: PropertyFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeletingImage, startDeleteImageTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState(property?.isAvailable ?? true);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState(() =>
+    parseAmenityList(property?.amenities.join(", ") ?? ""),
+  );
+  const [selectedUploads, setSelectedUploads] = useState<SelectedUpload[]>([]);
   const [removeImageIds, setRemoveImageIds] = useState<string[]>([]);
   const [formError, setFormError] = useState<string>();
+  const selectedUploadsRef = useRef<SelectedUpload[]>([]);
   const {
     register,
     handleSubmit,
@@ -58,13 +96,25 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
     },
   });
 
+  useEffect(() => {
+    selectedUploadsRef.current = selectedUploads;
+  }, [selectedUploads]);
+
+  useEffect(() => {
+    return () => {
+      selectedUploadsRef.current.forEach((upload) => {
+        URL.revokeObjectURL(upload.previewUrl);
+      });
+    };
+  }, []);
+
   function onSubmit(values: PropertyInput) {
     setFormError(undefined);
 
     const remainingExistingImages =
       (property?.images?.length ?? 0) - removeImageIds.length;
 
-    if (remainingExistingImages + selectedFiles.length > maxImageCount) {
+    if (remainingExistingImages + selectedUploads.length > maxImageCount) {
       const message = `A property can have at most ${maxImageCount} images.`;
       setFormError(message);
       toast.error(message);
@@ -80,17 +130,23 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
       formData.set("categoryId", values.categoryId);
       formData.set("amenities", values.amenities);
       formData.set("isAvailable", String(isAvailable));
-      selectedFiles.forEach((file) => formData.append("images", file));
-      removeImageIds.forEach((imageId) => formData.append("removeImageIds", imageId));
+      selectedUploads.forEach((upload) =>
+        formData.append("images", upload.file),
+      );
+      removeImageIds.forEach((imageId) =>
+        formData.append("removeImageIds", imageId),
+      );
 
       const result = await action(formData);
 
       if (!result.success) {
-        Object.entries(result.fieldErrors ?? {}).forEach(([field, messages]) => {
-          if (messages[0]) {
-            setError(field as keyof PropertyInput, { message: messages[0] });
-          }
-        });
+        Object.entries(result.fieldErrors ?? {}).forEach(
+          ([field, messages]) => {
+            if (messages[0]) {
+              setError(field as keyof PropertyInput, { message: messages[0] });
+            }
+          },
+        );
         toast.error(result.message);
         return;
       }
@@ -118,7 +174,9 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
   }
 
   function selectFiles(files: File[]) {
-    const invalidType = files.find((file) => !allowedImageTypes.includes(file.type));
+    const invalidType = files.find(
+      (file) => !allowedImageTypes.includes(file.type),
+    );
 
     if (invalidType) {
       const message = "Only JPG, PNG, and WEBP images are allowed.";
@@ -136,8 +194,55 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
       return;
     }
 
+    const remainingSlots = maxImageCount - selectedUploads.length;
+
+    if (remainingSlots <= 0) {
+      const message = `A property can have at most ${maxImageCount} images.`;
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+
+    const nextUploads = files.slice(0, remainingSlots).map((file) => ({
+      id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+
     setFormError(undefined);
-    setSelectedFiles(files.slice(0, maxImageCount));
+    setSelectedUploads((current) => [...current, ...nextUploads]);
+  }
+
+  function removeSelectedUpload(uploadId: string) {
+    setSelectedUploads((current) => {
+      const upload = current.find((item) => item.id === uploadId);
+
+      if (upload) {
+        URL.revokeObjectURL(upload.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== uploadId);
+    });
+  }
+
+  function moveSelectedUpload(uploadId: string, direction: "up" | "down") {
+    setSelectedUploads((current) => {
+      const currentIndex = current.findIndex((item) => item.id === uploadId);
+      const nextIndex =
+        direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= current.length) {
+        return current;
+      }
+
+      const nextUploads = [...current];
+      [nextUploads[currentIndex], nextUploads[nextIndex]] = [
+        nextUploads[nextIndex],
+        nextUploads[currentIndex],
+      ];
+
+      return nextUploads;
+    });
   }
 
   return (
@@ -191,21 +296,39 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
 
       <div className="space-y-2">
         <Label htmlFor="amenities">Amenities</Label>
-        <Input id="amenities" placeholder="wifi, parking, elevator" {...register("amenities")} />
+        <input type="hidden" {...register("amenities")} />
+        <SearchableMultiSelect
+          id="amenities"
+          options={getAmenityOptions(property?.amenities)}
+          value={selectedAmenities}
+          onChange={(nextAmenities) => {
+            setSelectedAmenities(nextAmenities);
+            setValue("amenities", serializeAmenityList(nextAmenities), {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+          }}
+          placeholder="Select amenities"
+          searchPlaceholder="Search amenities"
+        />
         <FieldError message={errors.amenities?.message} />
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <Label htmlFor="images">Property images</Label>
-          <p className="text-xs text-muted-foreground">JPG, PNG, WEBP. Max 6 images, 5MB each.</p>
+          <p className="text-xs text-muted-foreground">
+            JPG, PNG, WEBP. Max 6 images, 5MB each.
+          </p>
         </div>
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed bg-secondary/30 px-4 py-6 text-center transition-colors hover:bg-secondary/50">
           <ImagePlus className="size-8 text-primary" aria-hidden="true" />
-          <span className="mt-2 text-sm font-medium">Choose property photos</span>
+          <span className="mt-2 text-sm font-medium">
+            Choose property photos
+          </span>
           <span className="mt-1 text-xs text-muted-foreground">
-            {selectedFiles.length > 0
-              ? `${selectedFiles.length} file(s) selected`
+            {selectedUploads.length > 0
+              ? `${selectedUploads.length} file(s) selected`
               : "Upload living room, bedroom, exterior, and amenity photos"}
           </span>
           <input
@@ -216,20 +339,81 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
             className="sr-only"
             onChange={(event) => {
               selectFiles(Array.from(event.target.files ?? []));
+              event.target.value = "";
             }}
           />
         </label>
-        {selectedFiles.length > 0 ? (
+        {selectedUploads.length > 0 ? (
           <div className="rounded-lg border bg-background p-3">
-            <p className="mb-2 text-sm font-medium">Selected uploads</p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
-              {selectedFiles.map((file) => (
-                <li key={`${file.name}-${file.size}`} className="flex justify-between gap-3">
-                  <span className="truncate">{file.name}</span>
-                  <span>{formatFileSize(file.size)}</span>
-                </li>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-medium">Selected uploads</p>
+              <p className="text-xs text-muted-foreground">
+                Drag-free ordering: use arrows to set 1st, 2nd, and next photos.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {selectedUploads.map((upload, index) => (
+                <div
+                  key={upload.id}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <div className="relative aspect-[4/3] bg-muted">
+                    <Image
+                      src={upload.previewUrl}
+                      alt={`${upload.file.name} preview`}
+                      fill
+                      unoptimized
+                      sizes="(min-width: 1024px) 220px, 50vw"
+                      className="object-cover"
+                    />
+                    <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <div className="space-y-3 p-3">
+                    <div>
+                      <p className="truncate text-sm font-medium">
+                        {upload.file.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatFileSize(upload.file.size)}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Move ${upload.file.name} up`}
+                        disabled={index === 0}
+                        onClick={() => moveSelectedUpload(upload.id, "up")}
+                      >
+                        <ArrowUp className="size-4" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Move ${upload.file.name} down`}
+                        disabled={index === selectedUploads.length - 1}
+                        onClick={() => moveSelectedUpload(upload.id, "down")}
+                      >
+                        <ArrowDown className="size-4" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        aria-label={`Remove ${upload.file.name}`}
+                        onClick={() => removeSelectedUpload(upload.id)}
+                      >
+                        <X className="size-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         ) : null}
       </div>
@@ -247,14 +431,19 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
               const willRemove = removeImageIds.includes(image.id);
 
               return (
-                <div key={image.id} className="overflow-hidden rounded-lg border bg-background">
+                <div
+                  key={image.id}
+                  className="overflow-hidden rounded-lg border bg-background"
+                >
                   <div className="relative aspect-[4/3] bg-muted">
                     <Image
                       src={image.url}
                       alt={`${property.title} image`}
                       fill
                       sizes="(min-width: 1024px) 260px, 50vw"
-                      className={willRemove ? "object-cover opacity-40" : "object-cover"}
+                      className={
+                        willRemove ? "object-cover opacity-40" : "object-cover"
+                      }
                     />
                   </div>
                   <div className="space-y-2 p-3">
@@ -301,7 +490,9 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
           checked={isAvailable}
           onChange={(event) => {
             setIsAvailable(event.target.checked);
-            setValue("isAvailable", event.target.checked, { shouldDirty: true });
+            setValue("isAvailable", event.target.checked, {
+              shouldDirty: true,
+            });
           }}
         />
         Available for rent
@@ -310,7 +501,11 @@ export function PropertyForm({ categories, property, submitLabel, action }: Prop
       <FieldError message={formError} />
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+        {isPending ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Save className="size-4" />
+        )}
         {submitLabel}
       </Button>
     </form>

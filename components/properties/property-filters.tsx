@@ -7,6 +7,12 @@ import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SearchableMultiSelect } from "@/components/ui/searchable-multi-select";
+import {
+  getAmenityOptions,
+  parseAmenityList,
+  serializeAmenityList,
+} from "@/config/amenities";
 import type { Category } from "@/types/domain";
 
 type PropertyFiltersProps = {
@@ -47,7 +53,9 @@ export function PropertyFilters({ categories, values }: PropertyFiltersProps) {
       });
 
       startTransition(() => {
-        router.replace(params.size ? `${pathname}?${params}` : pathname, { scroll: false });
+        router.replace(params.size ? `${pathname}?${params}` : pathname, {
+          scroll: false,
+        });
       });
     }, 350);
 
@@ -70,11 +78,19 @@ export function PropertyFilters({ categories, values }: PropertyFiltersProps) {
   }
 
   return (
-    <section className="rounded-lg border bg-card p-4 shadow-sm" aria-label="Property search filters">
+    <section
+      className="rounded-lg border bg-card p-4 shadow-sm"
+      aria-label="Property search filters"
+    >
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="size-5 text-primary" aria-hidden="true" />
-          <h2 className="text-base font-semibold tracking-normal">Search and filter</h2>
+          <SlidersHorizontal
+            className="size-5 text-primary"
+            aria-hidden="true"
+          />
+          <h2 className="text-base font-semibold tracking-normal">
+            Search and filter
+          </h2>
         </div>
         <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
           <RotateCcw className="size-4" aria-hidden="true" />
@@ -90,7 +106,9 @@ export function PropertyFilters({ categories, values }: PropertyFiltersProps) {
             <Input
               id="searchTerm"
               value={filters.searchTerm}
-              onChange={(event) => updateFilter("searchTerm", event.target.value)}
+              onChange={(event) =>
+                updateFilter("searchTerm", event.target.value)
+              }
               placeholder="Apartment, hotel"
               className="pl-9"
             />
@@ -143,11 +161,15 @@ export function PropertyFilters({ categories, values }: PropertyFiltersProps) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="amenities">Amenities</Label>
-          <Input
+          <SearchableMultiSelect
             id="amenities"
-            value={filters.amenities}
-            onChange={(event) => updateFilter("amenities", event.target.value)}
-            placeholder="wifi, parking"
+            options={getAmenityOptions()}
+            value={parseAmenityList(filters.amenities)}
+            onChange={(nextAmenities) => {
+              updateFilter("amenities", serializeAmenityList(nextAmenities));
+            }}
+            placeholder="Select amenities"
+            searchPlaceholder="Search amenities"
           />
         </div>
       </div>
