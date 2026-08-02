@@ -8,7 +8,7 @@ Backend API: https://rent-nest-backend-lilac.vercel.app
 
 ## Documentation
 
-API integration map: `API_INTEGRATION.md`
+API integration map: [API_INTEGRATION.md](API_INTEGRATION.md)
 
 ## Admin Credentials
 
