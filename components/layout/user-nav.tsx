@@ -2,7 +2,21 @@
 
 import * as Avatar from "@radix-ui/react-avatar";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDown, LayoutDashboard, LogOut, UserCircle2 } from "lucide-react";
+import {
+  Building2,
+  ChevronDown,
+  CircleDollarSign,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  MessageSquareDot,
+  RotateCcwClock,
+  Star,
+  Tags,
+  UserCircle2,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -30,12 +44,17 @@ export function UserNav({ user }: UserNavProps) {
             <Avatar.Fallback>{initials}</Avatar.Fallback>
           </Avatar.Root>
           <span className="hidden text-left sm:block">
-            <span className="block text-sm font-medium leading-none">{user.name}</span>
+            <span className="block text-sm font-medium leading-none">
+              {user.name}
+            </span>
             <span className="mt-1 block text-xs uppercase tracking-[0.14em] text-muted-foreground">
               {user.role}
             </span>
           </span>
-          <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+          <ChevronDown
+            className="size-4 text-muted-foreground"
+            aria-hidden="true"
+          />
         </Button>
       </DropdownMenu.Trigger>
 
@@ -53,28 +72,35 @@ export function UserNav({ user }: UserNavProps) {
           <div className="my-2 h-px bg-border" />
 
           <DropdownMenu.Item asChild>
-            <Link
-              href={appRoutes.home}
-              className={menuItemClassName}
-            >
-              <LayoutDashboard className="size-4" aria-hidden="true" />
+            <Link href={appRoutes.home} className={menuItemClassName}>
+              <Home className="size-4" aria-hidden="true" />
               Home
             </Link>
           </DropdownMenu.Item>
 
-          {quickLinks.map((link) => (
-            <DropdownMenu.Item key={link.href} asChild>
-              <Link href={link.href} className={menuItemClassName}>
-                <UserCircle2 className="size-4" aria-hidden="true" />
-                {link.label}
-              </Link>
-            </DropdownMenu.Item>
-          ))}
+          {quickLinks.map((link) => {
+            const Icon = getMenuItemIcon(link.label);
+
+            return (
+              <DropdownMenu.Item key={link.href} asChild>
+                <Link href={link.href} className={menuItemClassName}>
+                  <Icon className="size-4" aria-hidden="true" />
+                  {link.label}
+                </Link>
+              </DropdownMenu.Item>
+            );
+          })}
 
           <div className="my-2 h-px bg-border" />
 
           <form action={logoutAction}>
-            <button type="submit" className={cn(menuItemClassName, "w-full text-left text-destructive")}>
+            <button
+              type="submit"
+              className={cn(
+                menuItemClassName,
+                "w-full text-left text-destructive",
+              )}
+            >
               <LogOut className="size-4" aria-hidden="true" />
               Logout
             </button>
@@ -97,4 +123,22 @@ function getInitials(name: string) {
     .join("");
 
   return letters || "RN";
+}
+
+function getMenuItemIcon(label: string): LucideIcon {
+  const iconByLabel: Record<string, LucideIcon> = {
+    Overview: LayoutDashboard,
+    Profile: UserCircle2,
+    "Rental requests": RotateCcwClock,
+    "Payment history": CircleDollarSign,
+    Reviews: Star,
+    "My properties": Building2,
+    Requests: MessageSquareDot,
+    "Tenant history": RotateCcwClock,
+    Users,
+    Properties: Building2,
+    Categories: Tags,
+  };
+
+  return iconByLabel[label] ?? LayoutDashboard;
 }
