@@ -12,6 +12,8 @@ import {
   noPropertyImageLabel,
 } from "@/lib/formatters/property-image";
 import type { Property } from "@/types/domain";
+import Link from "next/dist/client/link";
+import { appRoutes } from "@/config/routes";
 
 type AdminPropertiesTableProps = {
   properties: Property[];
@@ -82,7 +84,15 @@ function AdminPropertyRow({ property }: { property: Property }) {
 
   return (
     <tr className="border-b last:border-b-0">
-      <td className="py-4 pr-4 font-medium">{property.title}</td>
+      <td className="py-4 pr-4 font-medium">
+        <Link
+          href={appRoutes.propertyDetails(property.id)}
+          className="font-medium text-foreground hover:text-primary hover:underline"
+          target="blank"
+        >
+          {property.title}
+        </Link>
+      </td>
       <td className="py-4 pr-4">
         <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
           {imageUrl ? (
