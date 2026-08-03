@@ -152,22 +152,6 @@ Cancelled or failed payments are handled by the cancel page and user-friendly to
 /payment/cancel
 ```
 
-## Acknowledgements
-
-- [Shadcn UI](https://shadcn.com/)
-- [Radix UI](https://www.radix-ui.com/)
-- [React Hook Form](https://react-hook-form.com/)
-- [TanStack Query](https://tanstack.com/query/latest/)
-- [TanStack Table](https://tanstack.com/table/v8/)
-- [Stripe](https://stripe.com/)
-- [Sonner](https://sonner.npmjs.com/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [Recharts](https://recharts.org/)
-- [Lucide React](https://lucide.dev/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
-- [Next.js](https://nextjs.org/)
-- [Vercel](https://vercel.com/)
-
 ---
 
 ## ⭐ Support
