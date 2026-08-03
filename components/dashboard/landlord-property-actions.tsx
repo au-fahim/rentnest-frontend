@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useTransition } from "react";
 import { toast } from "sonner";
@@ -42,10 +42,10 @@ export function LandlordPropertyActions({ propertyId, isAvailable }: LandlordPro
         {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
         {isAvailable ? "Pause" : "Publish"}
       </Button>
-      <Button size="sm" variant="destructive" onClick={() => mutate("delete")} disabled={isPending}>
+      {/* <Button size="sm" variant="destructive" onClick={() => mutate("delete")} disabled={isPending}>
         <Trash2 className="size-4" aria-hidden="true" />
         Delete
-      </Button>
+      </Button> */}
     </div>
   );
 }

@@ -37,20 +37,30 @@ export function AwaitingPaymentsList({ requests }: AwaitingPaymentsListProps) {
 
       <div className="space-y-3">
         {pagination.visibleItems.map((request) => (
-          <div key={request.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            key={request.id}
+            className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div>
-              <p className="font-medium">{request.property?.title ?? request.propertyId}</p>
+              <p className="font-medium">
+                {request.property?.title ?? request.propertyId}
+              </p>
               <p className="text-sm text-muted-foreground">
-                {formatDate(request.moveInDate)} - {formatDate(request.moveOutDate)}
+                {formatDate(request.moveInDate)} -{" "}
+                {formatDate(request.moveOutDate)}
               </p>
             </div>
             <Button asChild size="sm">
-              <Link href={appRoutes.tenantRequestPayment(request.id)}>Continue payment</Link>
+              <Link href={appRoutes.tenantRequestPayment(request.id)}>
+                Continue payment
+              </Link>
             </Button>
           </div>
         ))}
         {pagination.visibleItems.length === 0 ? (
-          <p className="rounded-lg border p-4 text-sm text-muted-foreground">No awaiting payments match your search.</p>
+          <p className="rounded-lg border p-4 text-sm text-muted-foreground">
+            No awaiting payments match your search.
+          </p>
         ) : null}
       </div>
 
@@ -97,19 +107,36 @@ export function TenantPaymentsTable({ payments }: TenantPaymentsTableProps) {
             {pagination.visibleItems.map((payment) => (
               <tr key={payment.id} className="border-b last:border-b-0">
                 <td className="py-4 pr-4 font-medium">
-                  {payment.rentalRequest?.property?.title ?? payment.rentalRequestId}
+                  <Link
+                    href={appRoutes.propertyDetails(
+                      payment.rentalRequest?.property?.id ??
+                        payment.rentalRequestId,
+                    )}
+                    className="font-medium text-foreground hover:text-primary hover:underline"
+                    target="blank"
+                  >
+                    {payment.rentalRequest?.property?.title ??
+                      payment.rentalRequestId}
+                  </Link>
                 </td>
                 <td className="py-4 pr-4">{formatCurrency(payment.amount)}</td>
-                <td className="py-4 pr-4 text-muted-foreground">{payment.provider}</td>
+                <td className="py-4 pr-4 text-muted-foreground">
+                  {payment.provider}
+                </td>
                 <td className="py-4 pr-4">
                   <StatusBadge status={payment.status} />
                 </td>
-                <td className="py-4 pr-4 text-muted-foreground">{formatDate(payment.paidAt)}</td>
+                <td className="py-4 pr-4 text-muted-foreground">
+                  {formatDate(payment.paidAt)}
+                </td>
               </tr>
             ))}
             {pagination.visibleItems.length === 0 ? (
               <tr>
-                <td className="py-6 text-center text-muted-foreground" colSpan={5}>
+                <td
+                  className="py-6 text-center text-muted-foreground"
+                  colSpan={5}
+                >
                   No payments match your search.
                 </td>
               </tr>

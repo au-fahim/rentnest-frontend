@@ -8,14 +8,21 @@ import { useSearchPagination } from "@/components/dashboard/use-search-paginatio
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/formatters/currency";
-import { getPropertyImageUrl } from "@/lib/formatters/property-image";
+import {
+  getPropertyImageUrl,
+  noPropertyImageLabel,
+} from "@/lib/formatters/property-image";
 import type { Property } from "@/types/domain";
+import Link from "next/link";
+import { appRoutes } from "@/config/routes";
 
 type LandlordPropertiesTableProps = {
   properties: Property[];
 };
 
-export function LandlordPropertiesTable({ properties }: LandlordPropertiesTableProps) {
+export function LandlordPropertiesTable({
+  properties,
+}: LandlordPropertiesTableProps) {
   const pagination = useSearchPagination({
     items: properties,
     getSearchText: getPropertySearchText,
@@ -44,34 +51,14 @@ export function LandlordPropertiesTable({ properties }: LandlordPropertiesTableP
           </thead>
           <tbody>
             {pagination.visibleItems.map((property) => (
-              <tr key={property.id} className="border-b last:border-b-0">
-                <td className="py-4 pr-4 font-medium">{property.title}</td>
-                <td className="py-4 pr-4">
-                  <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
-                    <Image
-                      src={getPropertyImageUrl(property)}
-                      alt={property.title}
-                      fill
-                      sizes="64px"
-                      className="object-cover"
-                    />
-                  </div>
-                </td>
-                <td className="py-4 pr-4 text-muted-foreground">{property.location}</td>
-                <td className="py-4 pr-4">{formatCurrency(property.price)}</td>
-                <td className="py-4 pr-4">
-                  <Badge variant={property.isAvailable ? "success" : "secondary"}>
-                    {property.isAvailable ? "Available" : "Paused"}
-                  </Badge>
-                </td>
-                <td className="py-4 pr-4">
-                  <LandlordPropertyActions propertyId={property.id} isAvailable={property.isAvailable} />
-                </td>
-              </tr>
+              <LandlordPropertyRow key={property.id} property={property} />
             ))}
             {pagination.visibleItems.length === 0 ? (
               <tr>
-                <td className="py-6 text-center text-muted-foreground" colSpan={6}>
+                <td
+                  className="py-6 text-center text-muted-foreground"
+                  colSpan={6}
+                >
                   No properties match your search.
                 </td>
               </tr>
@@ -90,6 +77,54 @@ export function LandlordPropertiesTable({ properties }: LandlordPropertiesTableP
         onPageChange={pagination.setPageIndex}
       />
     </div>
+  );
+}
+
+function LandlordPropertyRow({ property }: { property: Property }) {
+  const imageUrl = getPropertyImageUrl(property);
+
+  return (
+    <tr className="border-b last:border-b-0">
+      <td className="py-4 pr-4 font-medium">
+        <Link
+          href={appRoutes.propertyDetails(property.id)}
+          className="font-medium text-foreground hover:text-primary hover:underline"
+          target="blank"
+        >
+          {property.title}
+        </Link>
+      </td>
+      <td className="py-4 pr-4">
+        <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={property.title}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-1 text-center text-[10px] font-medium leading-tight text-muted-foreground">
+              {noPropertyImageLabel}
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="py-4 pr-4 text-muted-foreground">{property.location}</td>
+      <td className="py-4 pr-4">{formatCurrency(property.price)}</td>
+      <td className="py-4 pr-4">
+        <Badge variant={property.isAvailable ? "success" : "secondary"}>
+          {property.isAvailable ? "Available" : "Paused"}
+        </Badge>
+      </td>
+      <td className="py-4 pr-4">
+        <LandlordPropertyActions
+          propertyId={property.id}
+          isAvailable={property.isAvailable}
+        />
+      </td>
+    </tr>
   );
 }
 

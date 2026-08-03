@@ -7,14 +7,19 @@ import { useSearchPagination } from "@/components/dashboard/use-search-paginatio
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/formatters/currency";
-import { getPropertyImageUrl } from "@/lib/formatters/property-image";
+import {
+  getPropertyImageUrl,
+  noPropertyImageLabel,
+} from "@/lib/formatters/property-image";
 import type { Property } from "@/types/domain";
 
 type AdminPropertiesTableProps = {
   properties: Property[];
 };
 
-export function AdminPropertiesTable({ properties }: AdminPropertiesTableProps) {
+export function AdminPropertiesTable({
+  properties,
+}: AdminPropertiesTableProps) {
   const pagination = useSearchPagination({
     items: properties,
     getSearchText: getPropertySearchText,
@@ -43,34 +48,14 @@ export function AdminPropertiesTable({ properties }: AdminPropertiesTableProps) 
           </thead>
           <tbody>
             {pagination.visibleItems.map((property) => (
-              <tr key={property.id} className="border-b last:border-b-0">
-                <td className="py-4 pr-4 font-medium">{property.title}</td>
-                <td className="py-4 pr-4">
-                  <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
-                    <Image
-                      src={getPropertyImageUrl(property)}
-                      alt={property.title}
-                      fill
-                      sizes="64px"
-                      className="object-cover"
-                    />
-                  </div>
-                </td>
-                <td className="py-4 pr-4 text-muted-foreground">
-                  {property.landlord?.name ?? property.landlordId}
-                </td>
-                <td className="py-4 pr-4 text-muted-foreground">{property.location}</td>
-                <td className="py-4 pr-4">{formatCurrency(property.price)}</td>
-                <td className="py-4 pr-4">
-                  <Badge variant={property.isAvailable ? "success" : "secondary"}>
-                    {property.isAvailable ? "Available" : "Unavailable"}
-                  </Badge>
-                </td>
-              </tr>
+              <AdminPropertyRow key={property.id} property={property} />
             ))}
             {pagination.visibleItems.length === 0 ? (
               <tr>
-                <td className="py-6 text-center text-muted-foreground" colSpan={6}>
+                <td
+                  className="py-6 text-center text-muted-foreground"
+                  colSpan={6}
+                >
                   No properties match your search.
                 </td>
               </tr>
@@ -89,6 +74,43 @@ export function AdminPropertiesTable({ properties }: AdminPropertiesTableProps) 
         onPageChange={pagination.setPageIndex}
       />
     </div>
+  );
+}
+
+function AdminPropertyRow({ property }: { property: Property }) {
+  const imageUrl = getPropertyImageUrl(property);
+
+  return (
+    <tr className="border-b last:border-b-0">
+      <td className="py-4 pr-4 font-medium">{property.title}</td>
+      <td className="py-4 pr-4">
+        <div className="relative size-16 overflow-hidden rounded-md border bg-muted">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={property.title}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-1 text-center text-[10px] font-medium leading-tight text-muted-foreground">
+              {noPropertyImageLabel}
+            </div>
+          )}
+        </div>
+      </td>
+      <td className="py-4 pr-4 text-muted-foreground">
+        {property.landlord?.name ?? property.landlordId}
+      </td>
+      <td className="py-4 pr-4 text-muted-foreground">{property.location}</td>
+      <td className="py-4 pr-4">{formatCurrency(property.price)}</td>
+      <td className="py-4 pr-4">
+        <Badge variant={property.isAvailable ? "success" : "secondary"}>
+          {property.isAvailable ? "Available" : "Unavailable"}
+        </Badge>
+      </td>
+    </tr>
   );
 }
 

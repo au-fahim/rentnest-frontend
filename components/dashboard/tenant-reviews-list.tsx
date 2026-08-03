@@ -58,6 +58,7 @@ export function TenantReviewsList({ items, highlightedPropertyId }: TenantReview
                   <Link
                     href={appRoutes.propertyDetails(item.property.id)}
                     className="font-medium text-foreground hover:text-primary hover:underline"
+                    target="blank"
                   >
                     {item.property.title}
                   </Link>

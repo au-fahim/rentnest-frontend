@@ -4,9 +4,11 @@ import { StatusBadge } from "@/components/dashboard/status-badge";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { useSearchPagination } from "@/components/dashboard/use-search-pagination";
 import { Input } from "@/components/ui/input";
+import { appRoutes } from "@/config/routes";
 import { formatCurrency } from "@/lib/formatters/currency";
 import { formatDate } from "@/lib/formatters/date";
 import type { RentalRequest } from "@/types/domain";
+import Link from "next/dist/client/link";
 
 type LandlordHistoryTableProps = {
   history: RentalRequest[];
@@ -41,15 +43,30 @@ export function LandlordHistoryTable({ history }: LandlordHistoryTableProps) {
           <tbody>
             {pagination.visibleItems.map((request) => (
               <tr key={request.id} className="border-b last:border-b-0">
-                <td className="py-4 pr-4 font-medium">{request.property?.title ?? request.propertyId}</td>
-                <td className="py-4 pr-4 text-muted-foreground">
-                  {request.tenant?.name ?? request.tenant?.email ?? request.tenantId}
+                <td className="py-4 pr-4 font-medium">
+                  <Link
+                    href={appRoutes.propertyDetails(
+                      request.property?.id ?? request.propertyId,
+                    )}
+                    className="font-medium text-foreground hover:text-primary hover:underline"
+                    target="blank"
+                  >
+                    {request.property?.title ?? request.propertyId}
+                  </Link>
                 </td>
                 <td className="py-4 pr-4 text-muted-foreground">
-                  {formatDate(request.moveInDate)} - {formatDate(request.moveOutDate)}
+                  {request.tenant?.name ??
+                    request.tenant?.email ??
+                    request.tenantId}
+                </td>
+                <td className="py-4 pr-4 text-muted-foreground">
+                  {formatDate(request.moveInDate)} -{" "}
+                  {formatDate(request.moveOutDate)}
                 </td>
                 <td className="py-4 pr-4">
-                  {formatCurrency(request.payment?.amount ?? request.property?.price ?? 0)}
+                  {formatCurrency(
+                    request.payment?.amount ?? request.property?.price ?? 0,
+                  )}
                 </td>
                 <td className="py-4 pr-4">
                   <StatusBadge status={request.status} />
@@ -58,7 +75,10 @@ export function LandlordHistoryTable({ history }: LandlordHistoryTableProps) {
             ))}
             {pagination.visibleItems.length === 0 ? (
               <tr>
-                <td className="py-6 text-center text-muted-foreground" colSpan={5}>
+                <td
+                  className="py-6 text-center text-muted-foreground"
+                  colSpan={5}
+                >
                   No tenant history matches your search.
                 </td>
               </tr>

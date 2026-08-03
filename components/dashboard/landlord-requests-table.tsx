@@ -5,14 +5,18 @@ import { StatusBadge } from "@/components/dashboard/status-badge";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { useSearchPagination } from "@/components/dashboard/use-search-pagination";
 import { Input } from "@/components/ui/input";
+import { appRoutes } from "@/config/routes";
 import { formatDate } from "@/lib/formatters/date";
 import type { RentalRequest } from "@/types/domain";
+import Link from "next/dist/client/link";
 
 type LandlordRequestsTableProps = {
   requests: RentalRequest[];
 };
 
-export function LandlordRequestsTable({ requests }: LandlordRequestsTableProps) {
+export function LandlordRequestsTable({
+  requests,
+}: LandlordRequestsTableProps) {
   const pagination = useSearchPagination({
     items: requests,
     getSearchText: getRequestSearchText,
@@ -41,24 +45,43 @@ export function LandlordRequestsTable({ requests }: LandlordRequestsTableProps) 
           <tbody>
             {pagination.visibleItems.map((request) => (
               <tr key={request.id} className="border-b last:border-b-0">
-                <td className="py-4 pr-4 font-medium">{request.property?.title ?? request.propertyId}</td>
-                <td className="py-4 pr-4 text-muted-foreground">
-                  {request.tenant?.name ?? request.tenant?.email ?? request.tenantId}
+                <td className="py-4 pr-4 font-medium">
+                  <Link
+                    href={appRoutes.propertyDetails(
+                      request.property?.id ?? request.propertyId,
+                    )}
+                    className="font-medium text-foreground hover:text-primary hover:underline"
+                    target="blank"
+                  >
+                    {request.property?.title ?? request.propertyId}
+                  </Link>
                 </td>
                 <td className="py-4 pr-4 text-muted-foreground">
-                  {formatDate(request.moveInDate)} - {formatDate(request.moveOutDate)}
+                  {request.tenant?.name ??
+                    request.tenant?.email ??
+                    request.tenantId}
+                </td>
+                <td className="py-4 pr-4 text-muted-foreground">
+                  {formatDate(request.moveInDate)} -{" "}
+                  {formatDate(request.moveOutDate)}
                 </td>
                 <td className="py-4 pr-4">
                   <StatusBadge status={request.status} />
                 </td>
                 <td className="py-4 pr-4">
-                  <RequestStatusActions rentalRequestId={request.id} currentStatus={request.status} />
+                  <RequestStatusActions
+                    rentalRequestId={request.id}
+                    currentStatus={request.status}
+                  />
                 </td>
               </tr>
             ))}
             {pagination.visibleItems.length === 0 ? (
               <tr>
-                <td className="py-6 text-center text-muted-foreground" colSpan={5}>
+                <td
+                  className="py-6 text-center text-muted-foreground"
+                  colSpan={5}
+                >
                   No requests match your search.
                 </td>
               </tr>
