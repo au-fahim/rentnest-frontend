@@ -23,7 +23,10 @@ type TenantReviewsListProps = {
   highlightedPropertyId?: string;
 };
 
-export function TenantReviewsList({ items, highlightedPropertyId }: TenantReviewsListProps) {
+export function TenantReviewsList({
+  items,
+  highlightedPropertyId,
+}: TenantReviewsListProps) {
   const highlightedRef = useRef<HTMLDivElement | null>(null);
   const pagination = useSearchPagination({
     items,
@@ -31,7 +34,10 @@ export function TenantReviewsList({ items, highlightedPropertyId }: TenantReview
   });
 
   useEffect(() => {
-    highlightedRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    highlightedRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }, []);
 
   return (
@@ -58,12 +64,13 @@ export function TenantReviewsList({ items, highlightedPropertyId }: TenantReview
                   <Link
                     href={appRoutes.propertyDetails(item.property.id)}
                     className="font-medium text-foreground hover:text-primary hover:underline"
-                    target="blank"
+                    target="_blank"
                   >
                     {item.property.title}
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(item.request.moveInDate)} - {formatDate(item.request.moveOutDate)}
+                    {formatDate(item.request.moveInDate)} -{" "}
+                    {formatDate(item.request.moveOutDate)}
                   </p>
                 </div>
                 <Badge variant={item.review ? "success" : "warning"}>
@@ -74,10 +81,16 @@ export function TenantReviewsList({ items, highlightedPropertyId }: TenantReview
               {item.review ? (
                 <div className="rounded-lg bg-secondary/40 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-medium">Your rating: {item.review.rating}/5</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(item.review.createdAt)}</p>
+                    <p className="font-medium">
+                      Your rating: {item.review.rating}/5
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(item.review.createdAt)}
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.review.comment}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {item.review.comment}
+                  </p>
                 </div>
               ) : (
                 <ReviewForm propertyId={item.property.id} />
@@ -86,7 +99,9 @@ export function TenantReviewsList({ items, highlightedPropertyId }: TenantReview
           );
         })}
         {pagination.visibleItems.length === 0 ? (
-          <p className="rounded-lg border p-4 text-sm text-muted-foreground">No review items match your search.</p>
+          <p className="rounded-lg border p-4 text-sm text-muted-foreground">
+            No review items match your search.
+          </p>
         ) : null}
       </div>
 

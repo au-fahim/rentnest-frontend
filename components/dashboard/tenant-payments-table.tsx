@@ -113,7 +113,7 @@ export function TenantPaymentsTable({ payments }: TenantPaymentsTableProps) {
                         payment.rentalRequestId,
                     )}
                     className="font-medium text-foreground hover:text-primary hover:underline"
-                    target="blank"
+                    target="_blank"
                   >
                     {payment.rentalRequest?.property?.title ??
                       payment.rentalRequestId}

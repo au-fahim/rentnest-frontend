@@ -45,12 +45,13 @@ export function TenantRequestsTable({ requests }: TenantRequestsTableProps) {
               <tr key={request.id} className="border-b last:border-b-0">
                 <td className="py-4 pr-4 font-medium">
                   <Link
-                    href={appRoutes.propertyDetails(request.property?.id ?? request.propertyId)}
+                    href={appRoutes.propertyDetails(
+                      request.property?.id ?? request.propertyId,
+                    )}
                     className="font-medium text-foreground hover:text-primary hover:underline"
-                    target="blank"
+                    target="_blank"
                   >
-                  {request.property?.title ?? request.propertyId}
-                    
+                    {request.property?.title ?? request.propertyId}
                   </Link>
                 </td>
                 <td className="py-4 pr-4 text-muted-foreground">

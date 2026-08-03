@@ -49,7 +49,7 @@ export function LandlordHistoryTable({ history }: LandlordHistoryTableProps) {
                       request.property?.id ?? request.propertyId,
                     )}
                     className="font-medium text-foreground hover:text-primary hover:underline"
-                    target="blank"
+                    target="_blank"
                   >
                     {request.property?.title ?? request.propertyId}
                   </Link>

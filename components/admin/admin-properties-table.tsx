@@ -88,7 +88,7 @@ function AdminPropertyRow({ property }: { property: Property }) {
         <Link
           href={appRoutes.propertyDetails(property.id)}
           className="font-medium text-foreground hover:text-primary hover:underline"
-          target="blank"
+          target="_blank"
         >
           {property.title}
         </Link>
